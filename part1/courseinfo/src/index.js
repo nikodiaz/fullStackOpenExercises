@@ -1,5 +1,6 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
 
 const Header = (props) => {
   return (
@@ -9,7 +10,10 @@ const Header = (props) => {
 
 const Part = (props) =>{
   return (
-    <p>{props.part} {props.exercises}</p>
+    <div className='partContainer'>
+      <p>{props.part}</p>
+      <p className='exercises'>Exercises: {props.exercises}</p>
+    </div>
   )
 }
 
@@ -41,9 +45,11 @@ const App = () => {
   return (
     <div>
       <Header course={course.name}/>
-      <Part part={course.parts[0].name} exercises={course.parts[0].exercises}/>
-      <Part part={course.parts[1].name} exercises={course.parts[1].exercises}/>
-      <Part part={course.parts[2].name} exercises={course.parts[2].exercises}/>
+      <div className='content'>
+        <Part part={course.parts[0].name} exercises={course.parts[0].exercises}/>
+        <Part part={course.parts[1].name} exercises={course.parts[1].exercises}/>
+        <Part part={course.parts[2].name} exercises={course.parts[2].exercises}/>
+      </div>
       <Total total={course.parts[0].exercises + course.parts[1].exercises + course.parts[2].exercises} />
     </div>
   )
