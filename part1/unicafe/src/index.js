@@ -22,6 +22,12 @@ const App = () => {
   const [good, setGood] = useState(0);
   const [neutral, setNeutral] = useState(0);
   const [bad, setBad] = useState(0);
+  const all = good + neutral - bad;
+  const average = (all / 3);
+  const positive = () => {
+    if(good === 0) return 0;
+    return 100 * (good / all)
+  };
 
   const countGoodComments = () => {
     setGood(good + 1);
@@ -30,7 +36,7 @@ const App = () => {
     setNeutral(neutral + 1);
   }
   const countBadComments = () => {
-    setBad(bad + 1);
+    setBad(bad - 1);
   }
 
   return (
@@ -46,6 +52,11 @@ const App = () => {
         <Comments text='Good' count={good}/>
         <Comments text='Neutral' count={neutral}/>
         <Comments text='Bad' count={bad}/>
+      </div>
+      <div className='counts'>
+        <Comments text='All' count={all}/>
+        <Comments text='Average' count={average}/>
+        <Comments text='Positive' count={positive() + '%'}/>
       </div>
     </div>
   )
