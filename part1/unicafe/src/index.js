@@ -2,18 +2,33 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './App.css';
 
+const random = (num) => Math.floor(Math.random() * num);
+
 const Button = ({handler, text}) => {
   return (
       <button onClick={handler}>{text}</button>
   )
 }
 
-const Comments = ({text, count}) => {
+const Statistics = ({text, count}) => {
   return (
-  <div>
-    <p>{text}</p>
-    <p>{count}</p>
-  </div>
+    <tr>
+      <td>{text}</td>
+      <td>{count}</td>
+    </tr>
+  )
+}
+
+const Anecdotes = ({text, select, count, votes}) => {
+  return(
+    <div className='displayAnecdotes'>
+      <div className='buttonAnecdote'>
+        <Button text='Vote' handler={count}/>
+        <Button text='Next Anecdote' handler={select}/>
+      </div>
+      <p>Has {votes} votes</p>
+      <p>{text}</p>
+    </div>
   )
 }
 
@@ -22,8 +37,12 @@ const App = () => {
   const [good, setGood] = useState(0);
   const [neutral, setNeutral] = useState(0);
   const [bad, setBad] = useState(0);
-  const all = good + neutral - bad;
-  const average = (all / 3);
+
+  const all = good + neutral + bad;
+  const average = () => {
+    if(good === 0 && bad === 0) return 0;
+    return (good - bad) / all;
+  };
   const positive = () => {
     if(good === 0) return 0;
     return 100 * (good / all)
@@ -36,9 +55,25 @@ const App = () => {
     setNeutral(neutral + 1);
   }
   const countBadComments = () => {
-    setBad(bad - 1);
+    setBad(bad + 1);
   }
-
+  if(good === 0 && neutral === 0 && bad === 0){
+    return (
+      <div>
+      <h2>Give feedback</h2>
+      <div className='buttons'>
+        <Button text='good' handler={countGoodComments} />
+        <Button text='neutral' handler={countNeutralComments} />
+        <Button text='bad' handler={countBadComments} />
+      </div>
+      <h2>Statistics</h2>
+      <div className='counts'>
+        <p>No feedback given</p>
+      </div>
+      <h2>Anecdotes</h2>
+    </div>
+    )
+  }
   return (
     <div>
       <h2>Give feedback</h2>
@@ -48,16 +83,16 @@ const App = () => {
         <Button text='bad' handler={countBadComments} />
       </div>
       <h2>Statistics</h2>
-      <div className='counts'>
-        <Comments text='Good' count={good}/>
-        <Comments text='Neutral' count={neutral}/>
-        <Comments text='Bad' count={bad}/>
-      </div>
-      <div className='counts'>
-        <Comments text='All' count={all}/>
-        <Comments text='Average' count={average}/>
-        <Comments text='Positive' count={positive() + '%'}/>
-      </div>
+        <table className='counts'>
+          <tbody>
+            <Statistics text='Good' count={good}/>
+            <Statistics text='Neutral' count={neutral}/>
+            <Statistics text='Bad' count={bad}/>
+            <Statistics text='All' count={all}/>
+            <Statistics text='Average' count={average()}/>
+            <Statistics text='Positive' count={positive() + '%'}/>
+          </tbody>
+        </table>
     </div>
   )
 }
