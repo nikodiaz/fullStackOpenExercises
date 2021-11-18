@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './App.css';
 
-const random = (num) => Math.floor(Math.random() * num);
-
 const Button = ({handler, text}) => {
   return (
       <button onClick={handler}>{text}</button>
@@ -16,19 +14,6 @@ const Statistics = ({text, count}) => {
       <td>{text}</td>
       <td>{count}</td>
     </tr>
-  )
-}
-
-const Anecdotes = ({text, select, count, votes}) => {
-  return(
-    <div className='displayAnecdotes'>
-      <div className='buttonAnecdote'>
-        <Button text='Vote' handler={count}/>
-        <Button text='Next Anecdote' handler={select}/>
-      </div>
-      <p>Has {votes} votes</p>
-      <p>{text}</p>
-    </div>
   )
 }
 
@@ -70,7 +55,6 @@ const App = () => {
       <div className='counts'>
         <p>No feedback given</p>
       </div>
-      <h2>Anecdotes</h2>
     </div>
     )
   }
