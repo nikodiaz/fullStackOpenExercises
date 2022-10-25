@@ -1,6 +1,11 @@
-import { VOTE } from './types';
+import { NEW_ANECDOTE, VOTE } from './types';
 
-export const Vote = (payload) => ({
+export const voteAnecdote = (id) => ({
 	type: VOTE,
-	payload,
+	payload: { id },
+});
+
+export const createAnecdote = (content) => ({
+	type: NEW_ANECDOTE,
+	payload: { content },
 });

@@ -1,4 +1,4 @@
-import { VOTE } from '../actions/types';
+import { NEW_ANECDOTE, VOTE } from '../actions/types';
 
 const anecdotesAtStart = [
 	'If it hurts, do it more often',
@@ -11,7 +11,7 @@ const anecdotesAtStart = [
 
 const getId = () => (100000 * Math.random()).toFixed(0);
 
-const asObject = (anecdote) => {
+export const asObject = (anecdote) => {
 	return {
 		content: anecdote,
 		id: getId(),
@@ -22,8 +22,6 @@ const asObject = (anecdote) => {
 const initialState = anecdotesAtStart.map(asObject);
 
 const reducer = (state = initialState, action) => {
-	console.log('state now: ', state);
-	console.log('action', action);
 	switch (action.type) {
 		case VOTE:
 			return state.map((anecdote) =>
@@ -31,6 +29,13 @@ const reducer = (state = initialState, action) => {
 					? { ...anecdote, votes: anecdote.votes + 1 }
 					: anecdote,
 			);
+		case NEW_ANECDOTE:
+			const newAnecdote = {
+				content: action.payload.content,
+				id: getId(),
+				votes: 0,
+			};
+			return [...state, newAnecdote];
 
 		default:
 			return state;
