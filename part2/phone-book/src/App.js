@@ -1,54 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
-import Person from './components/Persons';
+import Person from './components/Person';
+import personService from './services/persons';
 
 const App = () => {
-	const [persons, setPersons] = useState([
-		{ name: 'Arto Hellas', number: '040-123456' },
-		{ name: 'Ada Lovelace', number: '39-44-5323523' },
-		{ name: 'Dan Abramov', number: '12-43-234345' },
-		{ name: 'Mary Poppendieck', number: '39-23-6423122' }
-	])
- 	const [ newName, setNewName ] = useState('');
-	const [ newNumber, setNewNumber ] = useState('');
-	const [ search, setSearch ] = useState('');
+	const [persons, setPersons] = useState([]);
+	const [newName, setNewName] = useState('');
+	const [newNumber, setNewNumber] = useState('');
+	const [search, setSearch] = useState('');
+	const [loading, setLoading] = useState(true);
 
-	const personsToShow =  persons.filter(person => person.name.toLowerCase().includes(search.toLowerCase()));
+	useEffect(() => {
+		personService.getAll().then((initialPersons) => {
+			setLoading(false);
+			setPersons(initialPersons);
+		});
+	}, []);
+
+	const personsToShow = persons.filter((person) =>
+		person.name.toLowerCase().includes(search.toLowerCase()),
+	);
+
+	const updatePerson = (person, newPerson) => {
+		const updatedPerson = { ...person, number: newPerson.number };
+		personService.update(person.id, updatedPerson).then((res) => {
+			return setPersons(
+				persons.map((p) => (p.name !== newPerson.name ? p : res)),
+			);
+		});
+	};
 
 	const addPerson = (e) => {
 		e.preventDefault();
 		const personObject = {
 			name: newName,
-			number: newNumber
-		}
-		persons.forEach(person => {
-			if (person.name === newName) {
-				alert(`${newName} is already added in the phonebook`)
-			}else {
-				setPersons(persons.concat(personObject));
+			number: newNumber,
+		};
+		const person = persons.find((p) => p.name === personObject.name);
+
+		if (person) {
+			if (
+				window.confirm(
+					`${person.name} already is added with a phone number, replace the old number with the new onw?`,
+				)
+			) {
+				updatePerson(person, personObject);
 				setNewName('');
+				setNewNumber('');
 			}
-		})
-	}
+		} else {
+			personService.create(personObject).then((res) => {
+				setPersons((prevPersons) => prevPersons.concat(res));
+				setLoading(false);
+				setNewName('');
+				setNewNumber('');
+			});
+		}
+	};
+
+	const removePerson = ({ name, id }) => {
+		if (window.confirm(`Delete ${name}`)) {
+			personService.remove(id);
+			setPersons(persons.filter((person) => person.id !== id));
+		}
+	};
 
 	const handleChangeName = (e) => {
-		setNewName(e.target.value)
-	}
+		setNewName(e.target.value);
+	};
 
 	const handleChangeNumber = (e) => {
-		setNewNumber(e.target.value)
-	}
+		setNewNumber(e.target.value);
+	};
 
 	const handleChangeSearch = (e) => {
-		setSearch(e.target.value)
-	}
+		setSearch(e.target.value);
+	};
 
-  	return (
-    	<div>
-      		<h2>Phonebook</h2>
-        	<div>
-				<Filter value={search} filter={handleChangeSearch}/>
+	return (
+		<div>
+			<h2>Phonebook</h2>
+			<div>
+				<Filter value={search} filter={handleChangeSearch} />
 				<h3>Add a new:</h3>
 				<PersonForm
 					submit={addPerson}
@@ -57,20 +91,23 @@ const App = () => {
 					number={newNumber}
 					addNumber={handleChangeNumber}
 				/>
-        	</div>
-      		<h2>Numbers</h2>
-      		<div>
-				{personsToShow.map((person) => {
-					return(
-						<Person
-							key={person.name}
-							person={person}
-						/>
-					)
-				})}
 			</div>
-    	</div>
-  	)
-}
+			<h2>Numbers</h2>
+			<div>
+				{!loading
+					? personsToShow.map((person) => {
+							return (
+								<Person
+									key={person.name}
+									person={person}
+									remove={removePerson}
+								/>
+							);
+					  })
+					: null}
+			</div>
+		</div>
+	);
+};
 
-export default App
+export default App;
