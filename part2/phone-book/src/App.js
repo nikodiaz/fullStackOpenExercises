@@ -10,13 +10,32 @@ const App = () => {
 	const [newNumber, setNewNumber] = useState('');
 	const [search, setSearch] = useState('');
 	const [loading, setLoading] = useState(true);
+	const [message, setMessage] = useState({
+		notification: '',
+		error: '',
+	});
 
 	useEffect(() => {
-		personService.getAll().then((initialPersons) => {
-			setLoading(false);
-			setPersons(initialPersons);
-		});
+		personService
+			.getAll()
+			.then((initialPersons) => {
+				setLoading(false);
+				setPersons(initialPersons);
+			})
+			.catch((e) => setMessage(e));
 	}, []);
+
+	const errorStyle = {
+		padding: '0.5rem 2rem',
+		color: 'red',
+		border: '2px solid red',
+	};
+
+	const messageStyle = {
+		padding: '0.5rem 2rem',
+		color: 'green',
+		border: '2px solid green',
+	};
 
 	const personsToShow = persons.filter((person) =>
 		person.name.toLowerCase().includes(search.toLowerCase()),
@@ -24,11 +43,22 @@ const App = () => {
 
 	const updatePerson = (person, newPerson) => {
 		const updatedPerson = { ...person, number: newPerson.number };
-		personService.update(person.id, updatedPerson).then((res) => {
-			return setPersons(
-				persons.map((p) => (p.name !== newPerson.name ? p : res)),
-			);
-		});
+		personService
+			.update(person.id, updatedPerson)
+			.then((res) => {
+				return setPersons(
+					persons.map((p) => (p.name !== newPerson.name ? p : res)),
+				);
+			})
+			.catch((error) => {
+				setMessage({
+					notification: '',
+					error: `Information of ${person.name} has already been removed from server`,
+				});
+				setTimeout(() => {
+					setMessage({ notification: '', error: '' });
+				}, 5000);
+			});
 	};
 
 	const addPerson = (e) => {
@@ -48,14 +78,36 @@ const App = () => {
 				updatePerson(person, personObject);
 				setNewName('');
 				setNewNumber('');
+				setMessage({
+					error: '',
+					notification: `Updated ${person.name}`,
+				});
+				setTimeout(() => {
+					setMessage({ notification: '', error: '' });
+				}, 5000);
 			}
 		} else {
-			personService.create(personObject).then((res) => {
-				setPersons((prevPersons) => prevPersons.concat(res));
-				setLoading(false);
-				setNewName('');
-				setNewNumber('');
-			});
+			personService
+				.create(personObject)
+				.then((res) => {
+					setPersons((prevPersons) => prevPersons.concat(res));
+					setLoading(false);
+					setNewName('');
+					setNewNumber('');
+					setMessage({
+						error: '',
+						notification: `Added ${personObject.name} in phone book`,
+					});
+					setTimeout(() => {
+						setMessage({ notification: '', error: '' });
+					}, 5000);
+				})
+				.catch((error) => {
+					setMessage({
+						notification: '',
+						error: `Information of ${person.name} has already been removed from server`,
+					});
+				});
 		}
 	};
 
@@ -84,6 +136,12 @@ const App = () => {
 			<div>
 				<Filter value={search} filter={handleChangeSearch} />
 				<h3>Add a new:</h3>
+				{message.notification ? (
+					<h3 style={messageStyle}>{message.notification}</h3>
+				) : null}
+				{message.error ? (
+					<h3 style={errorStyle}>{message.error}</h3>
+				) : null}
 				<PersonForm
 					submit={addPerson}
 					name={newName}
